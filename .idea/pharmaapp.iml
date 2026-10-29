@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/apps/pharmaadmin/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/pharmaadmin/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/pharmaadmin/build" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/pharmabtob/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/pharmabtob/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/pharmabtob/build" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/pharmmed/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/pharmmed/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/pharmmed/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/authentication/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/authentication/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/authentication/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/core/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/core/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/core/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/database/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/database/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/database/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/design_system/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/design_system/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/design_system/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/network/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/network/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/network/build" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/shared_models/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/shared_models/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/shared_models/build" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

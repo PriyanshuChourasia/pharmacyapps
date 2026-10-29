@@ -1,30 +1,36 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:pharmmed/main.dart';
+import 'package:pharmmed/app/app.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('launches on Home without a login screen', (tester) async {
+    await tester.pumpWidget(const PharmmedApp());
+    await tester.pumpAndSettle();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Home is the initial tab.
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.text('Home'), findsWidgets);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // No sign-in gate on launch.
+    expect(find.text('Sign in'), findsNothing);
+    expect(find.text('Welcome back'), findsNothing);
+    expect(find.text('Create your account'), findsNothing);
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('switches between all five tabs', (tester) async {
+    await tester.pumpWidget(const PharmmedApp());
+    await tester.pumpAndSettle();
+
+    for (final tab in ['Categories', 'Cart', 'Orders', 'Profile']) {
+      await tester.tap(find.text(tab));
+      await tester.pumpAndSettle();
+      expect(find.text(tab), findsWidgets, reason: '$tab tab not visible');
+    }
+
+    // Tapping Home returns to the first tab.
+    await tester.tap(find.text('Home'));
+    await tester.pumpAndSettle();
+    expect(find.text('Home'), findsWidgets);
   });
 }

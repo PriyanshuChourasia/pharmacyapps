@@ -1,7 +1,7 @@
 name: shared_models
 description: "A new Flutter package project."
 version: 0.0.1
-homepage:
+publish_to: 'none'
 
 environment:
   sdk: ^3.10.7
@@ -10,6 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  core:
+    path: ../core
+  equatable: ^3.0.0
 
 dev_dependencies:
   flutter_test:
