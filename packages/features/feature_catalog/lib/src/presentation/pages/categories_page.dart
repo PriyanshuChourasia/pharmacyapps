@@ -6,7 +6,6 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_models/shared_models.dart';
 
-import '../catalog_icons.dart';
 import '../state/categories_cubit.dart';
 import '../state/load_status.dart';
 
@@ -31,7 +30,16 @@ class _CategoriesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories')),
+      appBar: AppBar(
+        title: const Text('Categories'),
+        actions: [
+          IconButton(
+            tooltip: 'Search',
+            icon: const Icon(Icons.search),
+            onPressed: () => context.push(RoutePaths.search),
+          ),
+        ],
+      ),
       body: BlocBuilder<CategoriesCubit, CategoriesState>(
         builder: (context, state) {
           switch (state.status) {
@@ -44,14 +52,12 @@ class _CategoriesView extends StatelessWidget {
                 title: 'Could not load categories',
                 message: state.error,
                 actionLabel: 'Retry',
-                onAction: () =>
-                    context.read<CategoriesCubit>().load(),
+                onAction: () => context.read<CategoriesCubit>().load(),
               );
             case LoadStatus.loaded:
               return GridView.builder(
                 padding: const EdgeInsets.all(AppSpacing.md),
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: AppSpacing.md,
                   crossAxisSpacing: AppSpacing.md,
@@ -64,7 +70,10 @@ class _CategoriesView extends StatelessWidget {
                     index: index,
                     child: _CategoryCard(
                       category: category,
-                      onTap: () => context.push('/categories/${category.id}?name=${Uri.encodeComponent(category.name)}'),
+                      onTap: () => context.push(
+                        '${RoutePaths.categoryProducts(category.id)}'
+                        '?name=${Uri.encodeQueryComponent(category.name)}',
+                      ),
                     ),
                   );
                 },

@@ -25,10 +25,7 @@ class _UiKitPageState extends State<UiKitPage> {
         padding: const EdgeInsets.all(AppSpacing.md),
         children: [
           const _SectionTitle('Buttons'),
-          AppButton(
-            label: 'Primary — Add to cart',
-            onPressed: () {},
-          ),
+          AppButton(label: 'Primary — Add to cart', onPressed: () {}),
           const SizedBox(height: AppSpacing.sm),
           AppButton(
             label: 'Secondary',
@@ -45,7 +42,11 @@ class _UiKitPageState extends State<UiKitPage> {
           Row(
             children: [
               Expanded(
-                child: AppButton(label: 'Loading', loading: true, onPressed: () {}),
+                child: AppButton(
+                  label: 'Loading',
+                  loading: true,
+                  onPressed: () {},
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               const Expanded(child: AppButton(label: 'Disabled')),
@@ -148,9 +149,7 @@ class _UiKitPageState extends State<UiKitPage> {
           const _SectionTitle('Shimmer skeleton (loading)'),
           Row(
             children: [
-              const Expanded(
-                child: ShimmerBox(height: 96),
-              ),
+              const Expanded(child: ShimmerBox(height: 96)),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
@@ -172,17 +171,16 @@ class _UiKitPageState extends State<UiKitPage> {
               for (var i = 0; i < 4; i++)
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(
-                      right: i < 3 ? AppSpacing.sm : 0,
-                    ),
+                    padding: EdgeInsets.only(right: i < 3 ? AppSpacing.sm : 0),
                     child: StaggeredFadeIn(
                       index: i,
                       child: Container(
                         height: 56,
                         decoration: BoxDecoration(
                           color: AppColors.primaryLight,
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusSm),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusSm,
+                          ),
                         ),
                         alignment: Alignment.center,
                         child: Text('${i + 1}'),

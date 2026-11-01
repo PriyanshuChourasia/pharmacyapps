@@ -55,15 +55,15 @@ class AppButton extends StatelessWidget {
             child: CircularProgressIndicator(strokeWidth: 2),
           )
         : icon != null
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: 18),
-                  const SizedBox(width: 8),
-                  Text(label),
-                ],
-              )
-            : Text(label);
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18),
+              const SizedBox(width: 8),
+              Text(label),
+            ],
+          )
+        : Text(label);
 
     final ButtonStyle style;
     final Widget button;
@@ -73,10 +73,7 @@ class AppButton extends StatelessWidget {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(0, 48),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         );
         button = FilledButton(
           style: style,
@@ -88,10 +85,7 @@ class AppButton extends StatelessWidget {
           backgroundColor: AppColors.primaryLight,
           foregroundColor: AppColors.primaryDark,
           minimumSize: const Size(0, 48),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         );
         button = FilledButton(
           style: style,
@@ -102,10 +96,7 @@ class AppButton extends StatelessWidget {
         style = TextButton.styleFrom(
           foregroundColor: AppColors.primaryDark,
           minimumSize: const Size(0, 48),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         );
         button = TextButton(
           style: style,

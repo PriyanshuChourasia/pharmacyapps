@@ -1,5 +1,5 @@
-name: pharmmed
-description: "A new Flutter project."
+name: dawaidukaan
+description: "PharmMed — customer medicine-shopping app (demo data)."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -37,13 +37,38 @@ dependencies:
 
   core:
     path: ../../packages/core
-
+  shared_models:
+    path: ../../packages/shared_models
   design_system:
     path: ../../packages/design_system
-  go_router: ^17.5.0
-  get_it: ^9.3.0
+  database:
+    path: ../../packages/database
+  authentication:
+    path: ../../packages/authentication
+  feature_auth:
+    path: ../../packages/features/feature_auth
   feature_catalog:
     path: ../../packages/features/feature_catalog
+  feature_cart:
+    path: ../../packages/features/feature_cart
+  feature_checkout:
+    path: ../../packages/features/feature_checkout
+  feature_home:
+    path: ../../packages/features/feature_home
+  feature_orders:
+    path: ../../packages/features/feature_orders
+  feature_profile:
+    path: ../../packages/features/feature_profile
+  go_router: ^17.5.0
+  get_it: ^9.3.0
+  shared_preferences: ^2.5.4
+  permission_handler: ^13.0.2
+
+dependency_overrides:
+  # 14.x targets AGP 9 + built-in Kotlin (`kotlin { compilerOptions }` with no
+  # Kotlin plugin applied) and fails to compile on this project's AGP 8.11.
+  # Remove once android/settings.gradle.kts moves to AGP 9.
+  permission_handler_android: 13.0.1
 
 dev_dependencies:
   flutter_test:

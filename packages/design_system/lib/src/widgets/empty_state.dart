@@ -15,7 +15,11 @@ class EmptyState extends StatelessWidget {
     this.message,
     this.actionLabel,
     this.onAction,
+    this.imageAsset,
   });
+
+  /// Optional illustration shown instead of [icon].
+  final String? imageAsset;
 
   final IconData icon;
   final String title;
@@ -32,7 +36,19 @@ class EmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 64, color: AppColors.textSecondary),
+            if (imageAsset != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                child: Image.asset(
+                  imageAsset!,
+                  height: 160,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Icon(icon, size: 64, color: AppColors.textSecondary),
+                ),
+              )
+            else
+              Icon(icon, size: 64, color: AppColors.textSecondary),
             const SizedBox(height: AppSpacing.md),
             Text(
               title,

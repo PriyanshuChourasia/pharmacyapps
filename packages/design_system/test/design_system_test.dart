@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget wrap(Widget child) => MaterialApp(
-        theme: AppTheme.light(),
-        home: Scaffold(body: Center(child: child)),
-      );
+    theme: AppTheme.light(),
+    home: Scaffold(body: Center(child: child)),
+  );
 
   group('AppTheme', () {
     test('light() builds a light teal theme', () {
@@ -29,17 +29,12 @@ void main() {
       expect(taps, 1);
     });
 
-    testWidgets('shows a spinner and ignores taps while loading',
-        (tester) async {
+    testWidgets('shows a spinner and ignores taps while loading', (
+      tester,
+    ) async {
       var taps = 0;
       await tester.pumpWidget(
-        wrap(
-          AppButton(
-            label: 'Add',
-            loading: true,
-            onPressed: () => taps++,
-          ),
-        ),
+        wrap(AppButton(label: 'Add', loading: true, onPressed: () => taps++)),
       );
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -58,9 +53,7 @@ void main() {
   });
 
   group('QuantityStepper', () {
-    Widget host() => wrap(
-          _StepperHost(initial: 2, max: 3),
-        );
+    Widget host() => wrap(_StepperHost(initial: 2, max: 3));
 
     testWidgets('renders the current value', (tester) async {
       await tester.pumpWidget(host());
@@ -116,8 +109,9 @@ void main() {
     // Note: bundled assets live in the app package, so the design_system
     // tests exercise the fallback contract; asset loading itself is covered
     // by the app's widget tests.
-    testWidgets('falls back to the placeholder when no asset is set',
-        (tester) async {
+    testWidgets('falls back to the placeholder when no asset is set', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrap(
           const ProductImage(
@@ -135,8 +129,9 @@ void main() {
       expect(find.byType(Image), findsNothing);
     });
 
-    testWidgets('falls back to the placeholder when the asset fails to load',
-        (tester) async {
+    testWidgets('falls back to the placeholder when the asset fails to load', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrap(
           const ProductImage(
@@ -158,9 +153,7 @@ void main() {
   group('PriceText', () {
     testWidgets('formats price with MRP and discount', (tester) async {
       await tester.pumpWidget(
-        wrap(
-          const PriceText(pricePaise: 13500, mrpPaise: 15000),
-        ),
+        wrap(const PriceText(pricePaise: 13500, mrpPaise: 15000)),
       );
 
       expect(find.text('₹135.00'), findsOneWidget);
@@ -169,9 +162,7 @@ void main() {
     });
 
     testWidgets('omits MRP and discount when none', (tester) async {
-      await tester.pumpWidget(
-        wrap(const PriceText(pricePaise: 49900)),
-      );
+      await tester.pumpWidget(wrap(const PriceText(pricePaise: 49900)));
 
       expect(find.text('₹499.00'), findsOneWidget);
       expect(find.text('-0%'), findsNothing);
@@ -206,9 +197,7 @@ void main() {
 
   group('LoadingView', () {
     testWidgets('shows a spinner and an optional message', (tester) async {
-      await tester.pumpWidget(
-        wrap(const LoadingView(message: 'Loading…')),
-      );
+      await tester.pumpWidget(wrap(const LoadingView(message: 'Loading…')));
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.text('Loading…'), findsOneWidget);

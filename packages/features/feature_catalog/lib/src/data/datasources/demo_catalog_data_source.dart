@@ -154,7 +154,8 @@ class DemoCatalogDataSource {
       mrp: 1350,
       price: 1200,
       img: 'assets/images/products/tablet_strip.jpg',
-      desc: 'Antiallergic tablet that controls sneezing, runny nose and itching.',
+      desc:
+          'Antiallergic tablet that controls sneezing, runny nose and itching.',
       uses: ['Allergic rhinitis', 'Watery eyes'],
       effects: ['Drowsiness', 'Dry mouth'],
     ),
@@ -249,7 +250,8 @@ class DemoCatalogDataSource {
       price: 20800,
       rx: true,
       img: 'assets/images/products/tablet_strip.jpg',
-      desc: 'Combination tablet for better blood-sugar control in type 2 diabetes.',
+      desc:
+          'Combination tablet for better blood-sugar control in type 2 diabetes.',
       uses: ['Type 2 diabetes', 'When metformin alone is not enough'],
       effects: ['Nausea', 'Diarrhoea'],
     ),
@@ -360,7 +362,8 @@ class DemoCatalogDataSource {
       price: 7800,
       rx: true,
       img: 'assets/images/products/cream_tube.jpg',
-      desc: 'Steroid-antibiotic cream for short-term use in inflamed skin conditions.',
+      desc:
+          'Steroid-antibiotic cream for short-term use in inflamed skin conditions.',
       uses: ['Eczema', 'Allergic dermatitis'],
       effects: ['Skin thinning', 'Burning'],
     ),
@@ -507,7 +510,8 @@ class DemoCatalogDataSource {
       mrp: 28500,
       price: 26000,
       img: 'assets/images/products/cream_tube.jpg',
-      desc: 'Hypoallergenic lotion that keeps a baby\u2019s skin soft and moisturised.',
+      desc:
+          'Hypoallergenic lotion that keeps a baby\u2019s skin soft and moisturised.',
       uses: ['Daily moisturising', 'Dry baby skin'],
       effects: ['Rare rash', 'None common'],
     ),
@@ -564,37 +568,37 @@ class DemoCatalogDataSource {
       _withDelay(() => List.unmodifiable(_categories));
 
   /// All demo products, optionally narrowed to one category.
-  Future<List<Product>> fetchProducts({String? categoryId}) =>
-      _withDelay(() {
-        final all = _products
-            .where(
-              (p) => categoryId == null ||
-                  p.categoryId == categoryId ||
-                  categoryId.isEmpty,
-            )
-            .toList(growable: false);
-        return List.unmodifiable(all);
-      });
+  Future<List<Product>> fetchProducts({String? categoryId}) => _withDelay(() {
+    final all = _products
+        .where(
+          (p) =>
+              categoryId == null ||
+              p.categoryId == categoryId ||
+              categoryId.isEmpty,
+        )
+        .toList(growable: false);
+    return List.unmodifiable(all);
+  });
 
   /// One product by id, or `null` when unknown.
-  Future<Product?> fetchProduct(String id) => _withDelay(
-        () => _products.where((p) => p.id == id).firstOrNull,
-      );
+  Future<Product?> fetchProduct(String id) =>
+      _withDelay(() => _products.where((p) => p.id == id).firstOrNull);
 
   /// Case-insensitive substring match over brand, generic name and salt.
   Future<List<Product>> search(String query) => _withDelay(() {
-        final q = query.trim().toLowerCase();
-        if (q.isEmpty) return const <Product>[];
-        final matches = _products
-            .where(
-              (p) =>
-                  p.name.toLowerCase().contains(q) ||
-                  p.genericName.toLowerCase().contains(q) ||
-                  p.salt.toLowerCase().contains(q),
-            )
-            .toList(growable: false);
-        return List.unmodifiable(matches);
-      });
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return const <Product>[];
+    final matches = _products
+        .where(
+          (p) =>
+              p.name.toLowerCase().contains(q) ||
+              p.genericName.toLowerCase().contains(q) ||
+              p.salt.toLowerCase().contains(q) ||
+              p.manufacturer.toLowerCase().contains(q),
+        )
+        .toList(growable: false);
+    return List.unmodifiable(matches);
+  });
 
   static Product _med({
     required String id,
@@ -612,23 +616,22 @@ class DemoCatalogDataSource {
     bool rx = false,
     bool inStock = true,
     String? img,
-  }) =>
-      Product(
-        id: id,
-        name: name,
-        genericName: generic,
-        salt: salt,
-        manufacturer: maker,
-        categoryId: cat,
-        packSize: pack,
-        mrp: mrp,
-        price: price,
-        requiresPrescription: rx,
-        inStock: inStock,
-        description: desc,
-        uses: uses,
-        sideEffects: effects,
-        storage: _storeBelow30,
-        imageAsset: img,
-      );
+  }) => Product(
+    id: id,
+    name: name,
+    genericName: generic,
+    salt: salt,
+    manufacturer: maker,
+    categoryId: cat,
+    packSize: pack,
+    mrp: mrp,
+    price: price,
+    requiresPrescription: rx,
+    inStock: inStock,
+    description: desc,
+    uses: uses,
+    sideEffects: effects,
+    storage: _storeBelow30,
+    imageAsset: img,
+  );
 }

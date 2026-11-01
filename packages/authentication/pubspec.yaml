@@ -1,6 +1,7 @@
 name: authentication
-description: "A new Flutter package project."
+description: "PharmMed package."
 version: 0.0.1
+publish_to: 'none'
 homepage:
 
 environment:
@@ -10,7 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  core:
+    path: ../core
 dev_dependencies:
   flutter_test:
     sdk: flutter

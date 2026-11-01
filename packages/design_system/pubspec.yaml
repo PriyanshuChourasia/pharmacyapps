@@ -1,5 +1,5 @@
 name: design_system
-description: "A new Flutter package project."
+description: "PharmMed package."
 version: 0.0.1
 publish_to: 'none'
 
@@ -10,10 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   core:
     path: ../core
-
+  shared_models:
+    path: ../shared_models
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,36 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:pharmmed/app/app.dart';
+import 'package:dawaidukaan/app/app.dart';
+import 'package:dawaidukaan/app/di/injector.dart';
 
 void main() {
-  testWidgets('launches on Home without a login screen', (tester) async {
-    await tester.pumpWidget(const PharmmedApp());
-    await tester.pumpAndSettle();
-
-    // Home is the initial tab.
-    expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.text('Home'), findsWidgets);
-
-    // No sign-in gate on launch.
-    expect(find.text('Sign in'), findsNothing);
-    expect(find.text('Welcome back'), findsNothing);
-    expect(find.text('Create your account'), findsNothing);
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
+    await configureDependencies();
   });
 
-  testWidgets('switches between all five tabs', (tester) async {
+  testWidgets('launches on Home and switches between all five tabs', (
+    tester,
+  ) async {
     await tester.pumpWidget(const PharmmedApp());
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
-    for (final tab in ['Categories', 'Cart', 'Orders', 'Profile']) {
-      await tester.tap(find.text(tab));
-      await tester.pumpAndSettle();
-      expect(find.text(tab), findsWidgets, reason: '$tab tab not visible');
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.text('PharmMed'), findsOneWidget);
+    expect(find.text('Log in to place your order'), findsNothing);
+
+    for (final tab in ['Categories', 'Cart', 'Orders', 'Profile', 'Home']) {
+      await tester.tap(find.text(tab).last);
+      await tester.pump(const Duration(seconds: 1));
     }
-
-    // Tapping Home returns to the first tab.
-    await tester.tap(find.text('Home'));
-    await tester.pumpAndSettle();
-    expect(find.text('Home'), findsWidgets);
+    expect(find.text('Shop by category'), findsOneWidget);
   });
 }

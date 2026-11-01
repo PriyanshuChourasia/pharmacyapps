@@ -10,9 +10,9 @@ class CartItem extends Equatable {
   const CartItem({required this.product, required this.qty});
 
   factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
-        product: Product.fromJson(json['product'] as Map<String, dynamic>),
-        qty: json['qty'] as int,
-      );
+    product: Product.fromJson(json['product'] as Map<String, dynamic>),
+    qty: json['qty'] as int,
+  );
 
   /// The product this line refers to.
   final Product product;
@@ -32,8 +32,7 @@ class CartItem extends Equatable {
   CartItem copyWith({int? qty}) =>
       CartItem(product: product, qty: qty ?? this.qty);
 
-  Map<String, dynamic> toJson() =>
-      {'product': product.toJson(), 'qty': qty};
+  Map<String, dynamic> toJson() => {'product': product.toJson(), 'qty': qty};
 
   @override
   List<Object?> get props => [product, qty];

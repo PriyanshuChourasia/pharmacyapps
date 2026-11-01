@@ -1,5 +1,4 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+/// Local persistence implementations (shared_preferences-backed).
+library;
+
+export 'src/shared_prefs_key_value_store.dart';

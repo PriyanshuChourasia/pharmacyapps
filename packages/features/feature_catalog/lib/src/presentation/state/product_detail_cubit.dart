@@ -13,6 +13,7 @@ class ProductDetailState extends Equatable {
     this.product,
     this.substitutes = const [],
     this.cartQty = 0,
+    this.cartCount = 0,
     this.error,
   });
 
@@ -24,6 +25,9 @@ class ProductDetailState extends Equatable {
 
   /// Quantity of this product in the cart (0 = not in cart).
   final int cartQty;
+
+  /// Total units in the cart (AppBar badge).
+  final int cartCount;
   final String? error;
 
   ProductDetailState copyWith({
@@ -31,30 +35,35 @@ class ProductDetailState extends Equatable {
     Product? product,
     List<Product>? substitutes,
     int? cartQty,
+    int? cartCount,
     String? error,
-  }) =>
-      ProductDetailState(
-        status: status ?? this.status,
-        product: product ?? this.product,
-        substitutes: substitutes ?? this.substitutes,
-        cartQty: cartQty ?? this.cartQty,
-        error: error,
-      );
+  }) => ProductDetailState(
+    status: status ?? this.status,
+    product: product ?? this.product,
+    substitutes: substitutes ?? this.substitutes,
+    cartQty: cartQty ?? this.cartQty,
+    cartCount: cartCount ?? this.cartCount,
+    error: error,
+  );
 
   @override
-  List<Object?> get props => [status, product, substitutes, cartQty, error];
+  List<Object?> get props => [
+    status,
+    product,
+    substitutes,
+    cartQty,
+    cartCount,
+    error,
+  ];
 }
 
 /// Loads one product plus its same-salt substitutes and mirrors the cart
 /// quantity for the Add/stepper control.
 class ProductDetailCubit extends Cubit<ProductDetailState> {
-  ProductDetailCubit(this._catalog, this._cart) : super(const ProductDetailState()) {
+  ProductDetailCubit(this._catalog, this._cart)
+    : super(const ProductDetailState()) {
     _cartSub = _cart.watch().listen((items) {
-      if (isClosed || state.product == null) return;
-      final qty = items
-          .where((i) => i.productId == state.product!.id)
-          .fold(0, (sum, i) => sum + i.qty);
-      emit(state.copyWith(cartQty: qty));
+      if (!isClosed) _syncCartQty(items);
     });
   }
 
@@ -118,18 +127,16 @@ class ProductDetailCubit extends Cubit<ProductDetailState> {
   }
 
   void _syncCartQty([List<CartItem>? items]) {
-    final list = items;
-    if (list != null) {
-      final qty = list
-          .where((i) => i.productId == state.product?.id)
-          .fold(0, (sum, i) => sum + i.qty);
-      emit(state.copyWith(cartQty: qty));
-      return;
-    }
-    final qty = _cart.items
-        .where((i) => i.productId == state.product?.id)
-        .fold(0, (sum, i) => sum + i.qty);
-    emit(state.copyWith(cartQty: qty));
+    final list = items ?? _cart.items;
+    final id = state.product?.id;
+    emit(
+      state.copyWith(
+        cartQty: list
+            .where((i) => i.productId == id)
+            .fold<int>(0, (sum, i) => sum + i.qty),
+        cartCount: list.fold<int>(0, (sum, i) => sum + i.qty),
+      ),
+    );
   }
 
   @override

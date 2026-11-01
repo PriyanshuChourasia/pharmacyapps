@@ -15,7 +15,10 @@ enum PaymentMethod {
 
 /// Status of a placed order (demo scope: only "Placed").
 enum OrderStatus {
-  placed('Placed');
+  placed('Placed'),
+  packed('Packed'),
+  shipped('Shipped'),
+  delivered('Delivered');
 
   const OrderStatus(this.label);
   final String label;
@@ -53,18 +56,21 @@ class Order extends Equatable {
 
   final OrderStatus status;
 
+  /// Whether the payment was collected online (vs. cash on delivery).
+  bool get isPrepaid => paymentMethod == PaymentMethod.upi;
+
   /// Total number of units across all lines.
   int get itemCount => items.fold(0, (sum, item) => sum + item.qty);
 
   @override
   List<Object?> get props => [
-        id,
-        items,
-        address,
-        slot,
-        paymentMethod,
-        breakdown,
-        createdAt,
-        status,
-      ];
+    id,
+    items,
+    address,
+    slot,
+    paymentMethod,
+    breakdown,
+    createdAt,
+    status,
+  ];
 }

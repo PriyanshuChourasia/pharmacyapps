@@ -1,14 +1,19 @@
+import 'package:core/core.dart';
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 
-/// Placeholder sign-in screen.
+import 'registration_page.dart';
+
+/// Login gate opened from checkout (and Profile). Pops `true` on success.
 ///
-/// No API is wired up yet: submitting validates the form, shows a fake
-/// loading delay, then displays a success snackbar.
+/// Demo: any non-empty phone/email + password signs in.
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key, this.onRegisterPressed});
+  const LoginPage({super.key, this.session});
 
-  /// Called when the user taps the "Register" link.
-  final VoidCallback? onRegisterPressed;
+  /// Defaults to the [AuthSession] registered in GetIt.
+  final AuthSession? session;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -16,133 +21,151 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
+  final _identifier = TextEditingController();
+  final _password = TextEditingController();
+  bool _obscure = true;
   bool _submitting = false;
+  String? _error;
+
+  AuthSession get _session => widget.session ?? GetIt.instance<AuthSession>();
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _identifier.dispose();
+    _password.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    final form = _formKey.currentState;
-    if (form == null || !form.validate()) return;
-
-    setState(() => _submitting = true);
-    // TODO(auth): replace with a real authentication call.
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
+    final result = await _session.login(
+      identifier: _identifier.text,
+      password: _password.text,
+    );
     if (!mounted) return;
     setState(() => _submitting = false);
+    result.when(
+      onSuccess: (session) {
+        showAppSnackBar(context, 'Welcome, ${session.userName}!');
+        context.pop(true);
+      },
+      onFailure: (message, _) => setState(() => _error = message),
+    );
+  }
 
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            'Signed in (placeholder): ${_emailController.text}',
-          ),
-        ),
-      );
+  Future<void> _openRegistration() async {
+    final ok = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => RegistrationPage(session: _session)),
+    );
+    if (ok == true && mounted) context.pop(true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          tooltip: 'Close',
+          onPressed: () => context.pop(false),
+        ),
+      ),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Icon(
-                    Icons.medication_outlined,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.primary,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const CircleAvatar(
+                  radius: 36,
+                  backgroundColor: AppColors.primaryLight,
+                  child: Icon(
+                    Icons.medication_rounded,
+                    size: 40,
+                    color: AppColors.primaryDark,
                   ),
-                  const SizedBox(height: 16),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Log in to place your order',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                const Text(
+                  'Demo: any phone/email and password works',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodySecondary,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                TextFormField(
+                  controller: _identifier,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [
+                    AutofillHints.email,
+                    AutofillHints.telephoneNumber,
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Mobile number or email',
+                    prefixIcon: Icon(Icons.person_outline),
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Enter your mobile number or email'
+                      : null,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                TextFormField(
+                  controller: _password,
+                  obscureText: _obscure,
+                  textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.password],
+                  onFieldSubmitted: (_) => _submit(),
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscure
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () => setState(() => _obscure = !_obscure),
+                    ),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? 'Enter your password' : null,
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Welcome back',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    _error!,
+                    style: const TextStyle(color: AppColors.danger),
                   ),
-                  const SizedBox(height: 32),
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email_outlined),
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      final text = value?.trim() ?? '';
-                      if (text.isEmpty) return 'Email is required';
-                      if (!text.contains('@') || !text.contains('.')) {
-                        return 'Enter a valid email address';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    autofillHints: const [AutofillHints.password],
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      border: const OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Password is required';
-                      }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
-                      return null;
-                    },
-                    onFieldSubmitted: (_) => _submit(),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: _submitting ? null : _submit,
-                    child: _submitting
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Sign in'),
-                  ),
-                  const SizedBox(height: 16),
-                  if (widget.onRegisterPressed != null)
-                    TextButton(
-                      onPressed: widget.onRegisterPressed,
-                      child: const Text(
-                        "Don't have an account? Register",
-                      ),
-                    ),
                 ],
-              ),
+                const SizedBox(height: AppSpacing.lg),
+                AppButton(
+                  label: 'Log in',
+                  loading: _submitting,
+                  onPressed: _submit,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextButton(
+                  onPressed: _submitting ? null : _openRegistration,
+                  child: const Text('New to PharmMed? Create account'),
+                ),
+              ],
             ),
           ),
         ),

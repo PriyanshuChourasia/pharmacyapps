@@ -7,7 +7,15 @@ import 'package:shared_models/shared_models.dart';
 import 'load_status.dart';
 
 /// Sort options for a category's product list.
-enum ProductSort { priceAsc, priceDesc, name }
+enum ProductSort {
+  relevance('Relevance'),
+  priceAsc('Price: low to high'),
+  priceDesc('Price: high to low'),
+  name('Name: A to Z');
+
+  const ProductSort(this.label);
+  final String label;
+}
 
 /// OTC/Rx filter options for a category's product list.
 enum ProductFilter { all, otc, rx }
@@ -18,7 +26,7 @@ class CategoryProductsState extends Equatable {
     required this.categoryId,
     this.status = LoadStatus.initial,
     this.products = const [],
-    this.sort = ProductSort.priceAsc,
+    this.sort = ProductSort.relevance,
     this.filter = ProductFilter.all,
     this.cartQty = const {},
     this.error,
@@ -36,20 +44,26 @@ class CategoryProductsState extends Equatable {
 
   /// Products after the active filter + sort.
   List<Product> get visible {
-    var list = products.where((p) {
-      return switch (filter) {
-        ProductFilter.all => true,
-        ProductFilter.otc => !p.requiresPrescription,
-        ProductFilter.rx => p.requiresPrescription,
-      };
-    }).toList(growable: true);
+    var list = products
+        .where((p) {
+          return switch (filter) {
+            ProductFilter.all => true,
+            ProductFilter.otc => !p.requiresPrescription,
+            ProductFilter.rx => p.requiresPrescription,
+          };
+        })
+        .toList(growable: true);
     switch (sort) {
+      case ProductSort.relevance:
+        break;
       case ProductSort.priceAsc:
         list.sort((a, b) => a.price.compareTo(b.price));
       case ProductSort.priceDesc:
         list.sort((a, b) => b.price.compareTo(a.price));
       case ProductSort.name:
-        list.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        list.sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
     }
     return list;
   }
@@ -61,30 +75,33 @@ class CategoryProductsState extends Equatable {
     ProductFilter? filter,
     Map<String, int>? cartQty,
     String? error,
-  }) =>
-      CategoryProductsState(
-        categoryId: categoryId,
-        status: status ?? this.status,
-        products: products ?? this.products,
-        sort: sort ?? this.sort,
-        filter: filter ?? this.filter,
-        cartQty: cartQty ?? this.cartQty,
-        error: error,
-      );
+  }) => CategoryProductsState(
+    categoryId: categoryId,
+    status: status ?? this.status,
+    products: products ?? this.products,
+    sort: sort ?? this.sort,
+    filter: filter ?? this.filter,
+    cartQty: cartQty ?? this.cartQty,
+    error: error,
+  );
 
   @override
-  List<Object?> get props =>
-      [categoryId, status, products, sort, filter, cartQty, error];
+  List<Object?> get props => [
+    categoryId,
+    status,
+    products,
+    sort,
+    filter,
+    cartQty,
+    error,
+  ];
 }
 
 /// Loads a category's products and applies sort/filter; also mirrors the
 /// cart so cards can morph Add → stepper.
 class CategoryProductsCubit extends Cubit<CategoryProductsState> {
-  CategoryProductsCubit(
-    this._catalog,
-    this._cart, {
-    required String categoryId,
-  }) : super(CategoryProductsState(categoryId: categoryId)) {
+  CategoryProductsCubit(this._catalog, this._cart, {required String categoryId})
+    : super(CategoryProductsState(categoryId: categoryId)) {
     _cartSub = _cart.watch().listen(_onCart);
   }
 

@@ -7,11 +7,9 @@ import 'app_colors.dart';
 abstract final class AppTheme {
   /// Light theme used by the whole app.
   static ThemeData light() {
-    final scheme =
-        ColorScheme.fromSeed(seedColor: AppColors.primary).copyWith(
-      surface: AppColors.surface,
-      error: AppColors.danger,
-    );
+    final scheme = ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+    ).copyWith(surface: AppColors.surface, error: AppColors.danger);
 
     return ThemeData(
       useMaterial3: true,

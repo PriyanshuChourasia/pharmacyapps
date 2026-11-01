@@ -16,13 +16,13 @@ class PriceBreakdown extends Equatable {
 
   /// A zeroed breakdown (empty cart).
   const PriceBreakdown.empty()
-      : itemMrpTotal = 0,
-        sellingTotal = 0,
-        discount = 0,
-        couponDiscount = 0,
-        deliveryFee = 0,
-        payable = 0,
-        couponCode = null;
+    : itemMrpTotal = 0,
+      sellingTotal = 0,
+      discount = 0,
+      couponDiscount = 0,
+      deliveryFee = 0,
+      payable = 0,
+      couponCode = null;
 
   /// Sum of MRP × qty, in paise.
   final int itemMrpTotal;
@@ -47,12 +47,12 @@ class PriceBreakdown extends Equatable {
 
   @override
   List<Object?> get props => [
-        itemMrpTotal,
-        sellingTotal,
-        discount,
-        couponDiscount,
-        deliveryFee,
-        payable,
-        couponCode,
-      ];
+    itemMrpTotal,
+    sellingTotal,
+    discount,
+    couponDiscount,
+    deliveryFee,
+    payable,
+    couponCode,
+  ];
 }

@@ -10,13 +10,19 @@ abstract interface class AuthSession {
   /// Display name of the signed-in user, or `null` when signed out.
   String? get userName;
 
+  /// The full session (name + identifier), or `null` when signed out.
+  SessionInfo? get currentSession;
+
   /// Emits every time the sign-in state changes.
   Stream<bool> get authChanges;
 
   /// Demo sign-in: accepts any non-empty identifier and password.
+  /// [name] is optional (sign-up); otherwise it is derived from the
+  /// identifier.
   Future<Result<SessionInfo>> login({
     required String identifier,
     required String password,
+    String? name,
   });
 
   /// Ends the current session (no-op when signed out).

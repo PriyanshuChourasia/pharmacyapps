@@ -1,6 +1,7 @@
 name: feature_cart
-description: "A new Flutter package project."
+description: "PharmMed package."
 version: 0.0.1
+publish_to: 'none'
 homepage:
 
 environment:
@@ -10,7 +11,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  core:
+    path: ../../core
+  shared_models:
+    path: ../../shared_models
+  design_system:
+    path: ../../design_system
+  equatable: ^3.0.0
+  flutter_bloc: ^8.1.6
+  get_it: ^9.3.0
+  go_router: ^17.5.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

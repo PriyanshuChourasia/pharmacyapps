@@ -1,14 +1,14 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
-/// Placeholder registration screen.
-///
-/// No API is wired up yet: submitting validates the form, shows a fake
-/// loading delay, then displays a success snackbar.
+/// Sign-up screen. On submit it signs the user in through [AuthSession]
+/// (demo) and pops `true`.
 class RegistrationPage extends StatefulWidget {
-  const RegistrationPage({super.key, this.onLoginPressed});
+  const RegistrationPage({super.key, this.session});
 
-  /// Called when the user taps the "Sign in" link.
-  final VoidCallback? onLoginPressed;
+  /// Defaults to the [AuthSession] registered in GetIt.
+  final AuthSession? session;
 
   @override
   State<RegistrationPage> createState() => _RegistrationPageState();
@@ -37,25 +37,27 @@ class _RegistrationPageState extends State<RegistrationPage> {
     if (form == null || !form.validate()) return;
 
     setState(() => _submitting = true);
-    // TODO(auth): replace with a real registration call.
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    final session = widget.session ?? GetIt.instance<AuthSession>();
+    final result = await session.login(
+      identifier: _emailController.text,
+      password: _passwordController.text,
+      name: _nameController.text,
+    );
     if (!mounted) return;
     setState(() => _submitting = false);
-
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            'Account created (placeholder): ${_emailController.text}',
-          ),
-        ),
+    if (result.isSuccess) {
+      Navigator.of(context).pop(true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.errorMessageOrNull ?? 'Sign-up failed')),
       );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -130,8 +132,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
                     validator: (value) {
@@ -174,11 +177,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         : const Text('Create account'),
                   ),
                   const SizedBox(height: 16),
-                  if (widget.onLoginPressed != null)
-                    TextButton(
-                      onPressed: widget.onLoginPressed,
-                      child: const Text('Already have an account? Sign in'),
-                    ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Already have an account? Log in'),
+                  ),
                 ],
               ),
             ),

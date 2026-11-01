@@ -8,17 +8,18 @@ import 'package:shared_models/shared_models.dart';
 
 import '../state/category_products_cubit.dart';
 import '../state/load_status.dart';
-import '../widgets/product_card.dart';
+import '../widgets/product_grid.dart';
 import '../widgets/product_list_skeleton.dart';
 
-/// One category's products with sort (price ↑/↓, name) and an OTC/Rx filter.
+/// One category's products: sort sheet, OTC/Rx filter chips and a grid.
 class CategoryProductsPage extends StatelessWidget {
   const CategoryProductsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final categoryId =
-        GoRouterState.of(context).pathParameters['id'] ?? '';
+        GoRouterState.of(context).pathParameters[RoutePaths.categoryIdParam] ??
+        '';
     return BlocProvider(
       create: (_) => CategoryProductsCubit(
         GetIt.instance<CatalogRepository>(),
@@ -33,6 +34,43 @@ class CategoryProductsPage extends StatelessWidget {
 class _CategoryProductsView extends StatelessWidget {
   const _CategoryProductsView();
 
+  void _showSortSheet(BuildContext context) {
+    final cubit = context.read<CategoryProductsCubit>();
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: RadioGroup<ProductSort>(
+          groupValue: cubit.state.sort,
+          onChanged: (sort) {
+            if (sort != null) cubit.setSort(sort);
+            Navigator.pop(sheetContext);
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  0,
+                  AppSpacing.md,
+                  AppSpacing.sm,
+                ),
+                child: Text('Sort by', style: AppTypography.sectionTitle),
+              ),
+              for (final sort in ProductSort.values)
+                RadioListTile<ProductSort>(
+                  value: sort,
+                  title: Text(sort.label),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final title =
@@ -42,52 +80,41 @@ class _CategoryProductsView extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         actions: [
-          BlocBuilder<CategoryProductsCubit, CategoryProductsState>(
-            buildWhen: (a, b) => a.sort != b.sort,
-            builder: (context, state) => PopupMenuButton<ProductSort>(
-              icon: const Icon(Icons.sort),
-              tooltip: 'Sort',
-              onSelected: (sort) =>
-                  context.read<CategoryProductsCubit>().setSort(sort),
-              itemBuilder: (context) => const [
-                PopupMenuItem(
-                  value: ProductSort.priceAsc,
-                  child: Text('Price: low to high'),
-                ),
-                PopupMenuItem(
-                  value: ProductSort.priceDesc,
-                  child: Text('Price: high to low'),
-                ),
-                PopupMenuItem(
-                  value: ProductSort.name,
-                  child: Text('Name (A–Z)'),
-                ),
-              ],
-            ),
+          IconButton(
+            tooltip: 'Search',
+            icon: const Icon(Icons.search),
+            onPressed: () => context.push(RoutePaths.search),
           ),
         ],
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.sm,
-              AppSpacing.md,
-              0,
-            ),
-            child: BlocBuilder<CategoryProductsCubit, CategoryProductsState>(
-              buildWhen: (a, b) => a.filter != b.filter,
-              builder: (context, state) => Row(
+          BlocBuilder<CategoryProductsCubit, CategoryProductsState>(
+            buildWhen: (a, b) => a.filter != b.filter || a.sort != b.sort,
+            builder: (context, state) => SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.md,
+                0,
+              ),
+              child: Row(
                 children: [
+                  ActionChip(
+                    avatar: const Icon(Icons.sort, size: 18),
+                    label: Text(state.sort.label),
+                    onPressed: () => _showSortSheet(context),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
                   for (final filter in ProductFilter.values)
                     Padding(
                       padding: const EdgeInsets.only(right: AppSpacing.sm),
                       child: ChoiceChip(
                         label: Text(switch (filter) {
                           ProductFilter.all => 'All',
-                          ProductFilter.otc => 'OTC only',
-                          ProductFilter.rx => 'Rx only',
+                          ProductFilter.otc => 'OTC',
+                          ProductFilter.rx => 'Rx',
                         }),
                         selected: state.filter == filter,
                         onSelected: (_) => context
@@ -102,6 +129,7 @@ class _CategoryProductsView extends StatelessWidget {
           Expanded(
             child: BlocBuilder<CategoryProductsCubit, CategoryProductsState>(
               builder: (context, state) {
+                final cubit = context.read<CategoryProductsCubit>();
                 switch (state.status) {
                   case LoadStatus.initial:
                   case LoadStatus.loading:
@@ -112,8 +140,7 @@ class _CategoryProductsView extends StatelessWidget {
                       title: 'Could not load medicines',
                       message: state.error,
                       actionLabel: 'Retry',
-                      onAction: () =>
-                          context.read<CategoryProductsCubit>().load(),
+                      onAction: cubit.load,
                     );
                   case LoadStatus.loaded:
                     final products = state.visible;
@@ -121,30 +148,14 @@ class _CategoryProductsView extends StatelessWidget {
                       return const EmptyState(
                         icon: Icons.filter_alt_off_outlined,
                         title: 'No products match this filter',
-                        message: 'Try a different sort or filter.',
+                        message: 'Try a different filter.',
                       );
                     }
-                    return ListView.builder(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        final product = products[index];
-                        return StaggeredFadeIn(
-                          index: index,
-                          child: ProductCard(
-                            product: product,
-                            qty: state.cartQty[product.id] ?? 0,
-                            onAdd: (p) =>
-                                context.read<CategoryProductsCubit>().add(p),
-                            onQtyChanged: (qty) => context
-                                .read<CategoryProductsCubit>()
-                                .setQty(product.id, qty),
-                            onTap: () => context
-                                .push(RoutePaths.productDetail(product.id)),
-                          ),
-                        );
-                      },
+                    return ProductGrid(
+                      products: products,
+                      cartQty: state.cartQty,
+                      onAdd: cubit.add,
+                      onQtyChanged: cubit.setQty,
                     );
                 }
               },

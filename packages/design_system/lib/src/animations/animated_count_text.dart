@@ -8,7 +8,11 @@ class AnimatedCountText extends StatelessWidget {
     super.key,
     this.style,
     this.duration = const Duration(milliseconds: 250),
+    this.formatter,
   });
+
+  /// Optional formatter (e.g. paise → `₹1,234.50`); defaults to `'$value'`.
+  final String Function(int value)? formatter;
 
   /// The number to show.
   final int value;
@@ -19,7 +23,7 @@ class AnimatedCountText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Text(
-      '$value',
+      formatter?.call(value) ?? '$value',
       key: ValueKey<int>(value),
       style: style,
       textAlign: TextAlign.center,

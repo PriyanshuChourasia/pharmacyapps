@@ -20,12 +20,11 @@ class CategoriesState extends Equatable {
     LoadStatus? status,
     List<Category>? categories,
     String? error,
-  }) =>
-      CategoriesState(
-        status: status ?? this.status,
-        categories: categories ?? this.categories,
-        error: error,
-      );
+  }) => CategoriesState(
+    status: status ?? this.status,
+    categories: categories ?? this.categories,
+    error: error,
+  );
 
   @override
   List<Object?> get props => [status, categories, error];
@@ -42,10 +41,7 @@ class CategoriesCubit extends Cubit<CategoriesState> {
     if (isClosed) return;
     result.when(
       onSuccess: (categories) => emit(
-        state.copyWith(
-          status: LoadStatus.loaded,
-          categories: categories,
-        ),
+        state.copyWith(status: LoadStatus.loaded, categories: categories),
       ),
       onFailure: (message, _) =>
           emit(state.copyWith(status: LoadStatus.error, error: message)),

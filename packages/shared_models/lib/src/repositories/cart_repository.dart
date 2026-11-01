@@ -28,6 +28,12 @@ abstract interface class CartRepository {
   /// Removes [productId]'s line.
   Future<Result<List<CartItem>>> remove(String productId);
 
-  /// Empties the cart (used on successful order placement).
+  /// Empties the cart and its coupon (used on successful order placement).
   Future<Result<List<CartItem>>> clear();
+
+  /// Coupon code applied in the cart (persisted with it), or `null`.
+  String? get couponCode;
+
+  /// Stores (or with `null`, removes) the applied coupon code.
+  Future<void> setCouponCode(String? code);
 }

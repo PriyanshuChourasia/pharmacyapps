@@ -1,5 +1,4 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+/// Authentication implementations (demo session for now).
+library;
+
+export 'src/demo_auth_session.dart';

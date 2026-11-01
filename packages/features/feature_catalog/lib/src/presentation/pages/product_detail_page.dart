@@ -8,17 +8,18 @@ import 'package:shared_models/shared_models.dart';
 
 import '../state/load_status.dart';
 import '../state/product_detail_cubit.dart';
-import '../widgets/product_card.dart';
+import '../widgets/product_detail_sections.dart';
 
-/// Full product screen: composition, uses, side effects, storage,
-/// same-salt substitutes, Hero image, quantity stepper and add/go-to-cart.
+/// Full product screen: Hero image, price, add-to-cart / stepper, expandable
+/// info sections, substitutes and delivery info.
 class ProductDetailPage extends StatelessWidget {
   const ProductDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final productId =
-        GoRouterState.of(context).pathParameters['id'] ?? '';
+        GoRouterState.of(context).pathParameters[RoutePaths.productIdParam] ??
+        '';
     return BlocProvider(
       create: (_) => ProductDetailCubit(
         GetIt.instance<CatalogRepository>(),
@@ -38,21 +39,35 @@ class _ProductDetailView extends StatelessWidget {
       builder: (context, state) {
         final product = state.product;
         return Scaffold(
-          appBar: AppBar(title: Text(product?.name ?? 'Medicine')),
-          body: switch (state.status) {
-            LoadStatus.initial || LoadStatus.loading => const _DetailSkeleton(),
-            LoadStatus.error => EmptyState(
-                icon: Icons.error_outline,
-                title: 'Could not load this medicine',
-                message: state.error,
+          appBar: AppBar(
+            title: Text(product?.name ?? 'Medicine'),
+            actions: [
+              IconButton(
+                tooltip: 'Search',
+                icon: const Icon(Icons.search),
+                onPressed: () => context.push(RoutePaths.search),
               ),
-            LoadStatus.loaded when product == null =>
-              const EmptyState(title: 'Product not found'),
+              CartIconButton(
+                count: state.cartCount,
+                onTap: () => context.go(RoutePaths.cart),
+              ),
+            ],
+          ),
+          body: switch (state.status) {
+            LoadStatus.initial || LoadStatus.loading => const DetailSkeleton(),
+            LoadStatus.error => EmptyState(
+              icon: Icons.error_outline,
+              title: 'Could not load this medicine',
+              message: state.error,
+            ),
+            LoadStatus.loaded when product == null => const EmptyState(
+              title: 'Product not found',
+            ),
             LoadStatus.loaded => _DetailBody(state: state, product: product!),
           },
           bottomNavigationBar: product == null
               ? null
-              : _BottomBar(state: state, product: product),
+              : _BottomBar(qty: state.cartQty, product: product),
         );
       },
     );
@@ -67,240 +82,115 @@ class _DetailBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return ListView(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       children: [
-        Hero(
-          tag: 'product-image-${product.id}',
-          child: ProductImage(
-            assetPath: product.imageAsset,
-            icon: Icons.medication_outlined,
-            letter: product.name,
-            width: double.infinity,
-            height: 220,
-            fit: BoxFit.cover,
-            borderRadius: BorderRadius.zero,
+        Container(
+          color: AppColors.surface,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Hero(
+            tag: productHeroTag(product.id),
+            child: ProductImage(
+              assetPath: product.imageAsset,
+              icon: Icons.medication_outlined,
+              letter: product.name,
+              width: double.infinity,
+              height: 240,
+            ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              StaggeredFadeIn(
-                index: 0,
-                child: Column(
+        Container(
+          color: AppColors.surface,
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            0,
+            AppSpacing.md,
+            AppSpacing.md,
+          ),
+          child: StaggeredFadeIn(
+            index: 0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            product.name,
-                            style: Theme.of(context).textTheme.headlineSmall!,
-                          ),
-                        ),
-                        if (product.requiresPrescription) ...[
-                          const SizedBox(width: AppSpacing.sm),
-                          const RxBadge(),
-                        ],
-                      ],
+                    Expanded(
+                      child: Text(product.name, style: textTheme.headlineSmall),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      '${product.manufacturer} · ${product.packSize}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
+                    if (product.requiresPrescription) const RxBadge(),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'by ${product.manufacturer}',
+                  style: const TextStyle(
+                    color: AppColors.primaryDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(product.packSize, style: AppTypography.bodySecondary),
+                const SizedBox(height: AppSpacing.sm + 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
                     PriceText(
                       pricePaise: product.price,
                       mrpPaise: product.mrp,
-                      style: Theme.of(context).textTheme.headlineSmall!,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      product.inStock
-                          ? 'In stock'
-                          : 'Out of stock — not orderable',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(
-                            color: product.inStock
-                                ? AppColors.success
-                                : AppColors.danger,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      product.description,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              StaggeredFadeIn(
-                index: 1,
-                child: _Section(
-                  title: 'Composition',
-                  child: Text(product.salt),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              StaggeredFadeIn(
-                index: 2,
-                child: _Section(
-                  title: 'Uses',
-                  child: Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: [
-                      for (final use in product.uses)
-                        Chip(
-                          label: Text(use),
-                          visualDensity: VisualDensity.compact,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              StaggeredFadeIn(
-                index: 3,
-                child: _Section(
-                  title: 'Side effects',
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final effect in product.sideEffects)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.only(top: 6),
-                                child: Icon(
-                                  Icons.circle,
-                                  size: 6,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              Expanded(child: Text(effect)),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              StaggeredFadeIn(
-                index: 4,
-                child: _Section(
-                  title: 'Storage',
-                  child: Text(product.storage),
-                ),
-              ),
-              if (state.substitutes.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.lg),
-                StaggeredFadeIn(
-                  index: 5,
-                  child: _Section(
-                    title: 'Substitutes (same composition)',
-                    child: SizedBox(
-                      height: 116,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: state.substitutes.length,
-                        separatorBuilder: (_, __) => const SizedBox(
-                          width: AppSpacing.sm,
-                        ),
-                        itemBuilder: (context, index) {
-                          final sub = state.substitutes[index];
-                          return _SubstituteCard(
-                            product: sub,
-                            onTap: () => context
-                                .pushReplacement(RoutePaths.productDetail(sub.id)),
-                          );
-                        },
+                      showDiscount: false,
+                      style: textTheme.headlineSmall!.copyWith(
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                  ),
+                    const SizedBox(width: AppSpacing.sm),
+                    if (product.discountPercent > 0)
+                      Text(
+                        '${product.discountPercent}% off',
+                        style: const TextStyle(
+                          color: AppColors.success,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                  ],
                 ),
+                const Text(
+                  'Inclusive of all taxes',
+                  style: AppTypography.caption,
+                ),
+                if (product.requiresPrescription) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  const Text(
+                    'A valid prescription is required to order this medicine.',
+                    style: TextStyle(fontSize: 12.5, color: AppColors.rx),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
+        const SizedBox(height: AppSpacing.sm),
+        const StaggeredFadeIn(index: 1, child: DeliveryInfoRow()),
+        const SizedBox(height: AppSpacing.sm),
+        StaggeredFadeIn(index: 2, child: ProductInfoSections(product: product)),
+        if (state.substitutes.isNotEmpty)
+          StaggeredFadeIn(
+            index: 3,
+            child: SubstitutesRow(
+              substitutes: state.substitutes,
+              onTap: (sub) =>
+                  context.pushReplacement(RoutePaths.productDetail(sub.id)),
+            ),
+          ),
       ],
     );
   }
 }
 
-class _SubstituteCard extends StatelessWidget {
-  const _SubstituteCard({required this.product, required this.onTap});
-
-  final Product product;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 220,
-      child: Card(
-        margin: EdgeInsets.zero,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: Row(
-              children: [
-                ProductImage(
-                  assetPath: product.imageAsset,
-                  icon: Icons.medication_outlined,
-                  letter: product.name,
-                  width: 44,
-                  height: 44,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        product.name,
-                        style: Theme.of(context).textTheme.titleSmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      PriceText(
-                        pricePaise: product.price,
-                        mrpPaise: product.mrp,
-                        showDiscount: false,
-                      style: Theme.of(context).textTheme.bodySmall!,
-                    ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _BottomBar extends StatelessWidget {
-  const _BottomBar({required this.state, required this.product});
+  const _BottomBar({required this.qty, required this.product});
 
-  final ProductDetailState state;
+  final int qty;
   final Product product;
 
   @override
@@ -309,27 +199,50 @@ class _BottomBar extends StatelessWidget {
 
     final Widget control;
     if (!product.inStock) {
-      control = const AppButton(label: 'Out of stock');
-    } else if (state.cartQty == 0) {
+      control = Row(
+        children: [
+          const Expanded(child: AppButton(label: 'Out of stock')),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
+              onPressed: () => showAppSnackBar(
+                context,
+                "We'll notify you when ${product.name} is back in stock",
+              ),
+              icon: const Icon(Icons.notifications_active_outlined),
+              label: const Text('Notify me'),
+            ),
+          ),
+        ],
+      );
+    } else if (qty == 0) {
       control = AppButton(
         label: 'Add to cart',
-        icon: Icons.shopping_cart_outlined,
-        onPressed: () async => showCartMessage(context, await cubit.add()),
+        icon: Icons.add_shopping_cart,
+        onPressed: () async {
+          final message = await cubit.add();
+          if (context.mounted) showAppSnackBar(context, message);
+        },
       );
     } else {
       control = Row(
         children: [
           QuantityStepper(
-            value: state.cartQty,
+            value: qty,
+            min: 0,
             max: CartRepository.maxQuantityPerItem,
-            onChanged: (qty) async =>
-                showCartMessage(context, await cubit.setQty(qty)),
+            onChanged: (next) async {
+              final message = await cubit.setQty(next);
+              if (context.mounted) showAppSnackBar(context, message);
+            },
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.sm + 4),
           Expanded(
             child: AppButton(
               label: 'Go to cart',
-              onPressed: () => context.push(RoutePaths.cart),
+              icon: Icons.shopping_cart_checkout,
+              onPressed: () => context.go(RoutePaths.cart),
             ),
           ),
         ],
@@ -344,60 +257,11 @@ class _BottomBar extends StatelessWidget {
           color: AppColors.surface,
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
-        child: control,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          child: KeyedSubtree(key: ValueKey(qty == 0), child: control),
+        ),
       ),
-    );
-  }
-}
-
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: AppSpacing.sm),
-        child,
-      ],
-    );
-  }
-}
-
-class _DetailSkeleton extends StatelessWidget {
-  const _DetailSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: const [
-        ShimmerBox(
-          height: 220,
-          borderRadius: BorderRadius.zero,
-        ),
-        Padding(
-          padding: EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ShimmerBox(height: 28, width: 220),
-              SizedBox(height: AppSpacing.sm),
-              ShimmerBox(height: 16, width: 160),
-              SizedBox(height: AppSpacing.md),
-              ShimmerBox(height: 22, width: 120),
-              SizedBox(height: AppSpacing.lg),
-              ShimmerBox(height: 72),
-              SizedBox(height: AppSpacing.lg),
-              ShimmerBox(height: 72),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

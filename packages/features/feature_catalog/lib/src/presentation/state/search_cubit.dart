@@ -35,14 +35,13 @@ class SearchState extends Equatable {
     List<Product>? results,
     Map<String, int>? cartQty,
     String? error,
-  }) =>
-      SearchState(
-        status: status ?? this.status,
-        query: query ?? this.query,
-        results: results ?? this.results,
-        cartQty: cartQty ?? this.cartQty,
-        error: error,
-      );
+  }) => SearchState(
+    status: status ?? this.status,
+    query: query ?? this.query,
+    results: results ?? this.results,
+    cartQty: cartQty ?? this.cartQty,
+    error: error,
+  );
 
   @override
   List<Object?> get props => [status, query, results, cartQty, error];
@@ -54,9 +53,7 @@ class SearchCubit extends Cubit<SearchState> {
     _cartSub = _cart.watch().listen((items) {
       if (!isClosed) {
         emit(
-          state.copyWith(
-            cartQty: {for (final i in items) i.productId: i.qty},
-          ),
+          state.copyWith(cartQty: {for (final i in items) i.productId: i.qty}),
         );
       }
     });
@@ -85,9 +82,8 @@ class SearchCubit extends Cubit<SearchState> {
     final result = await _catalog.searchProducts(query);
     if (isClosed) return;
     result.when(
-      onSuccess: (products) => emit(
-        state.copyWith(status: LoadStatus.loaded, results: products),
-      ),
+      onSuccess: (products) =>
+          emit(state.copyWith(status: LoadStatus.loaded, results: products)),
       onFailure: (message, _) =>
           emit(state.copyWith(status: LoadStatus.error, error: message)),
     );
@@ -98,7 +94,9 @@ class SearchCubit extends Cubit<SearchState> {
     final result = qty <= 0
         ? await _cart.remove(productId)
         : await _cart.updateQty(productId, qty);
-    if (!isClosed && result.isSuccess) _applyCart(result.dataOrNull ?? const []);
+    if (!isClosed && result.isSuccess) {
+      _applyCart(result.dataOrNull ?? const []);
+    }
     return result.errorMessageOrNull;
   }
 

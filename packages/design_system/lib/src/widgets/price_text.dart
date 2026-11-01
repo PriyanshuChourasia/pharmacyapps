@@ -34,23 +34,19 @@ class PriceText extends StatelessWidget {
   Widget build(BuildContext context) {
     final mrp = mrpPaise;
     final showMrp = mrp != null && mrp > pricePaise;
-    final discountPercent =
-        showMrp && mrp > 0 ? ((mrp - pricePaise) * 100) ~/ mrp : 0;
+    final discountPercent = showMrp && mrp > 0
+        ? ((mrp - pricePaise) * 100) ~/ mrp
+        : 0;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
+    // Wraps onto a second line in narrow cards instead of overflowing.
+    return Wrap(
+      spacing: AppSpacing.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Text(formatPaise(pricePaise), style: style),
-        if (showMrp) ...[
-          const SizedBox(width: AppSpacing.sm),
-          Text(formatPaise(mrp), style: mrpStyle),
-        ],
-        if (showDiscount && discountPercent > 0) ...[
-          const SizedBox(width: AppSpacing.sm),
+        if (showMrp) Text(formatPaise(mrp), style: mrpStyle),
+        if (showDiscount && discountPercent > 0)
           Text('-$discountPercent%', style: discountStyle),
-        ],
       ],
     );
   }

@@ -3,23 +3,23 @@ import 'package:shared_models/shared_models.dart';
 
 void main() {
   Product buildProduct({int mrp = 15000, int price = 13500}) => Product(
-        id: 'dolo-650',
-        name: 'Dolo 650',
-        genericName: 'Paracetamol',
-        salt: 'Paracetamol 650mg',
-        manufacturer: 'Micro Labs',
-        categoryId: 'pain_relief',
-        packSize: 'Strip of 15 tablets',
-        mrp: mrp,
-        price: price,
-        requiresPrescription: false,
-        inStock: true,
-        description: 'Fever and pain relief tablet.',
-        uses: const ['Fever', 'Headache'],
-        sideEffects: const ['Nausea'],
-        storage: 'Store in a cool, dry place.',
-        imageAsset: 'assets/images/products/tablet_strip.jpg',
-      );
+    id: 'dolo-650',
+    name: 'Dolo 650',
+    genericName: 'Paracetamol',
+    salt: 'Paracetamol 650mg',
+    manufacturer: 'Micro Labs',
+    categoryId: 'pain_relief',
+    packSize: 'Strip of 15 tablets',
+    mrp: mrp,
+    price: price,
+    requiresPrescription: false,
+    inStock: true,
+    description: 'Fever and pain relief tablet.',
+    uses: const ['Fever', 'Headache'],
+    sideEffects: const ['Nausea'],
+    storage: 'Store in a cool, dry place.',
+    imageAsset: 'assets/images/products/tablet_strip.jpg',
+  );
 
   group('Product', () {
     test('computes discount percent with integer math', () {

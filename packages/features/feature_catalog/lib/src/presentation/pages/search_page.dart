@@ -8,7 +8,7 @@ import 'package:shared_models/shared_models.dart';
 
 import '../state/load_status.dart';
 import '../state/search_cubit.dart';
-import '../widgets/product_card.dart';
+import '../widgets/product_grid.dart';
 import '../widgets/product_list_skeleton.dart';
 
 /// Debounced search over brand, generic name and salt composition.
@@ -36,6 +36,21 @@ class _SearchView extends StatefulWidget {
 
 class _SearchViewState extends State<_SearchView> {
   final _controller = TextEditingController();
+  bool _prefilled = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_prefilled) return;
+    _prefilled = true;
+    final query = GoRouterState.of(
+      context,
+    ).uri.queryParameters[RoutePaths.searchQueryParam];
+    if (query != null && query.isNotEmpty) {
+      _controller.text = query;
+      context.read<SearchCubit>().onQueryChanged(query);
+    }
+  }
 
   @override
   void dispose() {
@@ -53,7 +68,7 @@ class _SearchViewState extends State<_SearchView> {
             padding: const EdgeInsets.all(AppSpacing.md),
             child: TextField(
               controller: _controller,
-              autofocus: true,
+              autofocus: _controller.text.isEmpty,
               textInputAction: TextInputAction.search,
               onChanged: (value) {
                 context.read<SearchCubit>().onQueryChanged(value);
@@ -68,13 +83,10 @@ class _SearchViewState extends State<_SearchView> {
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           _controller.clear();
-                          context
-                              .read<SearchCubit>()
-                              .onQueryChanged('');
+                          context.read<SearchCubit>().onQueryChanged('');
                           setState(() {});
                         },
                       ),
-                border: const OutlineInputBorder(),
               ),
             ),
           ),
@@ -85,14 +97,13 @@ class _SearchViewState extends State<_SearchView> {
                   return const EmptyState(
                     icon: Icons.search,
                     title: 'Search medicines',
-                    message:
-                        'Find by brand, generic name or salt composition.',
+                    message: 'Find by brand, generic name or salt composition.',
                   );
                 }
                 switch (state.status) {
                   case LoadStatus.initial:
                   case LoadStatus.loading:
-                    return const ProductListSkeleton(count: 3);
+                    return const ProductListSkeleton(count: 4);
                   case LoadStatus.error:
                     return EmptyState(
                       icon: Icons.error_outline,
@@ -107,27 +118,12 @@ class _SearchViewState extends State<_SearchView> {
                         message: 'Check the spelling or try a salt name.',
                       );
                     }
-                    return ListView.builder(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                      itemCount: state.results.length,
-                      itemBuilder: (context, index) {
-                        final product = state.results[index];
-                        return StaggeredFadeIn(
-                          index: index,
-                          child: ProductCard(
-                            product: product,
-                            qty: state.cartQty[product.id] ?? 0,
-                            onAdd: (p) =>
-                                context.read<SearchCubit>().add(p),
-                            onQtyChanged: (qty) => context
-                                .read<SearchCubit>()
-                                .setQty(product.id, qty),
-                            onTap: () => context
-                                .push(RoutePaths.productDetail(product.id)),
-                          ),
-                        );
-                      },
+                    final cubit = context.read<SearchCubit>();
+                    return ProductGrid(
+                      products: state.results,
+                      cartQty: state.cartQty,
+                      onAdd: cubit.add,
+                      onQtyChanged: cubit.setQty,
                     );
                 }
               },

@@ -3,6 +3,7 @@
 library;
 
 export 'src/auth_session.dart';
+export 'src/date_format.dart';
 export 'src/key_value_store.dart';
 export 'src/money.dart';
 export 'src/payment_gateway.dart';

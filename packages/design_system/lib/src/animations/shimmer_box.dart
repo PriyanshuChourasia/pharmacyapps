@@ -9,8 +9,7 @@ class ShimmerBox extends StatefulWidget {
     super.key,
     this.width,
     this.height,
-    this.borderRadius =
-        const BorderRadius.all(Radius.circular(12)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
   });
 
   final double? width;

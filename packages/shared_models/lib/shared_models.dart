@@ -10,5 +10,8 @@ export 'src/models/money.dart';
 export 'src/models/order.dart';
 export 'src/models/price_breakdown.dart';
 export 'src/models/product.dart';
+export 'src/pricing/pricing_calculator.dart';
+export 'src/repositories/address_repository.dart';
 export 'src/repositories/cart_repository.dart';
 export 'src/repositories/catalog_repository.dart';
+export 'src/repositories/orders_repository.dart';
