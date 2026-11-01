@@ -138,8 +138,7 @@ GoRouter buildAppRouter() {
       _top(RoutePaths.checkout, (_) => const CheckoutPage()),
       _top(RoutePaths.addAddress, (_) => const AddAddressPage()),
       _top(RoutePaths.checkoutSuccess, (_) => const OrderSuccessPage()),
-      _top('/login', (_) => const LoginScreen()),
-      
+      _top(RoutePaths.login, (_) => const LoginScreen()),
     ],
   );
 }
