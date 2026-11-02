@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:dawaidukaan/app/widgets/location_setup_screen.dart';
+
 /// Branded launch screen: teal gradient, animated logo mark, app name and
 /// tagline. After a short hold it routes to Home when already signed in,
 /// otherwise to Login.
@@ -63,13 +65,20 @@ class _SplashScreenState extends State<SplashScreen>
     if (MediaQuery.disableAnimationsOf(context)) _controller.value = 1;
   }
 
-  void _goNext() {
+  Future<void> _goNext() async {
     if (!mounted) return;
     final getIt = GetIt.instance;
     final loggedIn =
         getIt.isRegistered<AuthSession>() && getIt<AuthSession>().isLoggedIn;
-    context.go(loggedIn ? RoutePaths.home : RoutePaths.login);
+    if (!loggedIn) {
+      context.go(RoutePaths.login);
+      return;
+    }
+    final hasLocation = await hasSavedLocation();
+    if (!mounted) return;
+    context.go(hasLocation ? RoutePaths.home : RoutePaths.locationSetup);
   }
+
 
   @override
   void dispose() {

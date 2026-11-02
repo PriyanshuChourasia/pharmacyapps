@@ -63,6 +63,8 @@ dependencies:
   get_it: ^9.3.0
   shared_preferences: ^2.5.4
   permission_handler: ^13.0.2
+  geolocator: ^10.1.0
+  geocoding: ^3.0.0
 
 dependency_overrides:
   # 14.x targets AGP 9 + built-in Kotlin (`kotlin { compilerOptions }` with no

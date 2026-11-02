@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:dawaidukaan/app/widgets/location_setup_screen.dart';
 import 'package:dawaidukaan/app/widgets/splash_screen.dart';
 import 'package:dawaidukaan/app/widgets/login_screen.dart';
 import 'package:feature_cart/feature_cart.dart';
@@ -139,6 +140,7 @@ GoRouter buildAppRouter() {
       _top(RoutePaths.addAddress, (_) => const AddAddressPage()),
       _top(RoutePaths.checkoutSuccess, (_) => const OrderSuccessPage()),
       _top(RoutePaths.login, (_) => const LoginScreen()),
+      _top(RoutePaths.locationSetup, (_) => const LocationSetupScreen()),
     ],
   );
 }

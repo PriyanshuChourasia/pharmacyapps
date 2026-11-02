@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:dawaidukaan/app/widgets/location_setup_screen.dart';
+
 /// Phone + OTP login.
 ///
 /// Reached two ways:
@@ -146,14 +148,19 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  void _finish({required bool signedIn, String? greeting}) {
+  Future<void> _finish({required bool signedIn, String? greeting}) async {
     if (greeting != null) showAppSnackBar(context, greeting);
+    // Pushed from checkout / profile: hand the result back, no location step.
     if (context.canPop()) {
       context.pop(signedIn);
-    } else {
-      context.go(RoutePaths.home);
+      return;
     }
+    // From the splash (OTP, Google or Skip): ask for a delivery location first.
+    final hasLocation = await hasSavedLocation();
+    if (!mounted) return;
+    context.go(hasLocation ? RoutePaths.home : RoutePaths.locationSetup);
   }
+
 
   @override
   Widget build(BuildContext context) {

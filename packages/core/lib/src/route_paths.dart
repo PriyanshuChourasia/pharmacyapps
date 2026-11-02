@@ -33,6 +33,7 @@ abstract final class RoutePaths {
   static const String addAddress = '/address/new';
   static const String checkoutSuccess = '/order-success';
   static const String uiKit = '/ui-kit';
+  static const String locationSetup = '/location-setup';
 
   /// Path of a product detail page for [id].
   static String productDetail(String id) => '$productDetailBase/$id';

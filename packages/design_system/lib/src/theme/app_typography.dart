@@ -29,6 +29,22 @@ abstract final class AppTypography {
     color: AppColors.textSecondary,
   );
 
+  /// Body large text.
+  static const TextStyle bodyLarge = TextStyle(
+    fontSize: 16,
+    height: 1.6,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  );
+
+  /// Body small text.
+  static const TextStyle bodySmall = TextStyle(
+    fontSize: 12,
+    height: 1.4,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textSecondary,
+  );
+
   /// Selling price.
   static const TextStyle price = TextStyle(
     fontSize: 16,
